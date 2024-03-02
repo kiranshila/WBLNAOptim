@@ -14,7 +14,8 @@ function plot_performance(L, widths, target)
     input_rl = 10 .* log10.(mag_s11_squared.(s_match, target.s))
     plot_freqs = target.freqs .* 1e-9
     plot(plot_freqs, total_noise, label="Noise")
-    noise_plot = plot!(plot_freqs, input_tmin, label="Minimum Noise", ylims=(0, 20), xlabel="Freq (GHz)", ylabel="Noise (K)", legend=false)
+    plot!(plot_freqs, input_tmin, label="Minimum Noise", ylims=(0, 20), xlabel="Freq (GHz)", ylabel="Noise (K)", legend=false)
+    noise_plot = annotate!(1.2, 3, "Avg Noise: $(mean(total_noise))", 10)
     s11_plot = plot(plot_freqs, input_rl; label="S11", ylims=(-20, 0), xlabel="Freq (GHz)", ylabel="S11 (dB)", legend=false)
     points = range(0, L, length(widths)) .* 1000
     plot(points, widths ./ 2 .* 1000, aspect_ratio=1, linetype=:steppre)
