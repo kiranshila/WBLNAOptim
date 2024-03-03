@@ -1,4 +1,4 @@
-using CircuitNetworks, Statistics, Optimization, OptimizationOptimJL
+using CircuitNetworks, Statistics, Optimization, OptimizationOptimJL, CSV, DelimitedFiles
 using OptimizationNLopt
 using ForwardDiff, PolyesterForwardDiff, Enzyme
 
@@ -32,11 +32,13 @@ callback = function (state, cost)
 end
 
 # Solving
-N = 5
-θ₀ = [90e-3, fill(3e-3, N)...]
-lb = [20e-3, fill(0.2e-3, N)...]
-ub = [120e-3, fill(20e-3, N)...]
-
-optf = OptimizationFunction(cost, Optimization.AutoForwardDiff())
-prob = OptimizationProblem(optf, θ₀, TARGET; callback=callback, lb=lb, ub=ub)
-sol = solve(prob, NLopt.LD_LBFGS())
+for N in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 25, 50, 100]
+    θ₀ = [90e-3, fill(3e-3, N)...]
+    lb = [20e-3, fill(0.2e-3, N)...]
+    ub = [120e-3, fill(20e-3, N)...]
+    optf = OptimizationFunction(cost, Optimization.AutoForwardDiff())
+    prob = OptimizationProblem(optf, θ₀, TARGET; callback=callback, lb=lb, ub=ub)
+    sol = solve(prob, NLopt.LD_LBFGS())
+    writedlm("$(@__DIR__)/../shape_results/optim_$(N).csv", sol.u, ',')
+    savefig(plot_performance(sol.u[1], sol.u[2:end], TARGET), "$(@__DIR__)/../plots/optim_$(N).png")
+end
