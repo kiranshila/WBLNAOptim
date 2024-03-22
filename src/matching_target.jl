@@ -35,3 +35,4 @@ function TwoPortNetwork(csv_filename)
 end
 
 const TARGET = TwoPortNetwork("$(@__DIR__)/../data/LNA_Noise_S.csv")
+const DIE_4F50 = TwoPortNetwork("$(@__DIR__)/../data/4F50_Noise_S.csv")
