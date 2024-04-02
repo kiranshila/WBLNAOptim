@@ -32,28 +32,32 @@ function cost(L, Zfeed, widths, target)
     #input_rl = mag_s11_squared.(s_match, target.s)
     #rl_cost = mean(input_rl)
 
+    step_cost = mean(abs2.(widths[2:end] .- widths[1:end-1]))
+
     # Total weighted cost
-    10 * noise_cost + 3 * noise_mismatch_cost #+ 1 * rl_cost
+    10 * noise_cost + 3 * noise_mismatch_cost + 5000 * step_cost #+ 1 * rl_cost
 end
 
-cost(θ, target) = cost(θ[1], θ[2], θ[3:end], target)
+cost(θ, target) = cost(θ[1], 100, θ[3:end], target)
 
 callback = function (state, cost)
     θ = state.u
     @show cost
-    display(plot_performance_100(θ[1], θ[2], θ[3:end], DIE_4F50))
+    display(plot_performance_100(θ[1], 100, θ[3:end], TARGET))
     #cost < 0.135
     return false
 end
 
 # Solving
-N = 25
-θ₀ = [90e-3, 20, fill(1e-3, N)...]
-lb = [20e-3, 19.0, fill(0.4e-3, N)...]
-ub = [120e-3, 501.0, fill(15e-3, N)...]
+N = 10
+θ₀ = [90e-3, fill(1e-3, N)...]
+lb = [20e-3, fill(0.4e-3, N)...]
+ub = [120e-3, fill(15e-3, N)...]
 optf = OptimizationFunction(cost, Optimization.AutoForwardDiff())
-prob = OptimizationProblem(optf, θ₀, DIE_4F50; callback=callback, lb=lb, ub=ub)
+prob = OptimizationProblem(optf, θ₀, TARGET; callback=callback, lb=lb, ub=ub)
 sol = solve(prob, NLopt.LD_LBFGS())
 
 #writedlm("$(@__DIR__)/../shape_results/optim_$(N).csv", sol.u, ',')
 #savefig(plot_performance(sol.u[1], sol.u[2:end], TARGET), "$(@__DIR__)/../plots/optim_$(N).png")
+
+#plot_performance_100(sol.u[1], 100, sol.u[3:end], TARGET)
